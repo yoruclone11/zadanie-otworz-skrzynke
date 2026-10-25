@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Panel badacza</title>
+  <meta name="robots" content="noindex, nofollow">
+  <script src="js/config.js"></script>
+  <style>
+    :root { color-scheme: light; --bg:#f5f5f4; --card:#fff; --text:#1c1c1c; --muted:#6b6b6b; --line:#e4e4e2;
+            --blue:#4677b0; --red:#d01c1c; --gray:#8a8a8a; }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 16px 60px; }
+    h1 { font-size: 24px; margin: 0 0 4px; }
+    h2 { font-size: 17px; margin: 0 0 12px; }
+    .muted { color: var(--muted); }
+    .grid { display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin: 20px 0; }
+    .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+    .kpi b { display:block; font-size: 28px; font-variant-numeric: tabular-nums; }
+    .kpi span { color: var(--muted); font-size: 13px; }
+    table { width:100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+    th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    td.num, th.num { text-align: right; }
+    .scroll { overflow-x: auto; }
+    .two { display:grid; gap:12px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin-top: 12px; }
+    .bar { display:grid; grid-template-columns: 120px 1fr 64px; gap:10px; align-items:center; margin: 8px 0; }
+    .bar .track { height: 18px; background:#efefed; border-radius: 4px; position: relative; overflow: hidden; }
+    .bar .fill { height:100%; border-radius: 4px; transition: width .6s ease; }
+    .bar .err { position:absolute; top:7px; height:4px; background: rgba(0,0,0,.45); }
+    .row { display:flex; gap:8px; flex-wrap: wrap; align-items:center; }
+    input { flex:1; min-width: 260px; font: inherit; padding: 9px 12px; border:1px solid var(--line); border-radius: 8px; }
+    button { font: inherit; font-weight: 600; padding: 9px 16px; border: 0; border-radius: 8px; background: #222; color:#fff; cursor:pointer; }
+    .note { font-size: 13px; color: var(--muted); margin-top: 10px; }
+    .error { color: var(--red); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Panel badacza</h1>
+  <p class="muted">Zbiorcze statystyki na żywo (tylko ważne rekordy: ukończone, nietestowe, niewycofane, bez osób, które notowały lub znały kod). Dane jednostkowe są wyłącznie w arkuszu Google.</p>
+
+  <div class="card">
+    <div class="row">
+      <input id="ep" placeholder="Adres aplikacji Apps Script (…/exec)">
+      <button id="load">Odśwież</button>
+    </div>
+    <p class="note" id="status"></p>
+  </div>
+
+  <div class="grid" id="kpis"></div>
+
+  <div class="card">
+    <h2>Średni wynik pozycyjny (0–10) z odchyleniem standardowym</h2>
+    <div class="two">
+      <div><h2 class="muted" style="font-size:14px">Wersje (2×2)</h2><div id="bars-cond"></div></div>
+      <div><h2 class="muted" style="font-size:14px">Czynniki główne</h2><div id="bars-fact"></div></div>
+    </div>
+  </div>
+
+  <div class="card scroll" style="margin-top:12px">
+    <h2>Tabela</h2>
+    <table id="tbl"></table>
+    <p class="note">Planowana liczebność: ok. 32 osoby na wersję (≈128 łącznie) wystarczy do wykrycia średniego efektu głównego (d ≈ 0,5) przy mocy 0,8. Statystyki inferencyjne (ANOVA 2×2) liczy skrypt <code>analiza/analiza.py</code>.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  const ep = document.getElementById('ep');
+  const saved = (() => { try { return localStorage.getItem('panel_ep'); } catch (e) { return null; } })();
+  ep.value = (window.STUDY_CONFIG && window.STUDY_CONFIG.ENDPOINT) || saved || '';
+  const st = document.getElementById('status');
+  const LABEL = { A:'A · nieb. zaokr.', B:'B · nieb. ostra', C:'C · czerw. zaokr.', D:'D · czerw. ostra',
+                  niebieska:'Kolor: niebieski', czerwona:'Kolor: czerwony', zaokraglona:'Kształt: zaokr.', ostra:'Kształt: ostry' };
+  const COL = { A:'var(--blue)', B:'var(--blue)', C:'var(--red)', D:'var(--red)', niebieska:'var(--blue)', czerwona:'var(--red)', zaokraglona:'var(--gray)', ostra:'#333' };
+  const fmt = (v, d = 2) => v == null ? '—' : Number(v).toLocaleString('pl-PL', { maximumFractionDigits: d });
+
+  function bars(el, keys, g) {
+    el.innerHTML = keys.map(k => {
+      const x = g[k].wynik_pozycje; const m = x.srednia || 0, sd = x.sd || 0;
+      return `<div class="bar"><span>${LABEL[k]} <span class="muted">(n=${x.n})</span></span>
+        <div class="track"><div class="fill" style="width:${m * 10}%;background:${COL[k]}"></div>
+        <div class="err" style="left:${Math.max(0, m - sd) * 10}%;width:${Math.min(10, sd * 2) * 10}%"></div></div>
+        <b style="text-align:right">${fmt(m)}</b></div>`;
+    }).join('');
+  }
+
+  async function load() {
+    const url = ep.value.trim();
+    if (!url) { st.innerHTML = '<span class="error">Podaj adres aplikacji Apps Script.</span>'; return; }
+    try { localStorage.setItem('panel_ep', url); } catch (e) {}
+    st.textContent = 'Ładowanie…';
+    try {
+      const res = await fetch(url + '?action=stats&_=' + Date.now());
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || 'błąd');
+      const s = data.stats, g = s.grupy;
+      document.getElementById('kpis').innerHTML = [
+        ['Ważne rekordy', s.wazne], ['Ukończone', s.ukonczone], ['Przerwane', s.przerwane],
+        ['Wykluczone', s.wykluczone_notowal_lub_znal_kod], ['Wycofane', s.wycofane], ['Testowe', s.testowe],
+      ].map(([l, v]) => `<div class="card kpi"><b>${v}</b><span>${l}</span></div>`).join('');
+      bars(document.getElementById('bars-cond'), ['A', 'B', 'C', 'D'], g);
+      bars(document.getElementById('bars-fact'), ['niebieska', 'czerwona', 'zaokraglona', 'ostra'], g);
+      const keys = ['A', 'B', 'C', 'D', 'niebieska', 'czerwona', 'zaokraglona', 'ostra'];
+      document.getElementById('tbl').innerHTML =
+        '<tr><th>Grupa</th><th class="num">N</th><th class="num">Wynik pozycje M</th><th class="num">SD</th><th class="num">Cyfry M</th><th class="num">Czas/kafelek [ms]</th><th class="num">Nauka łącznie [s]</th><th class="num">Stres M</th><th class="num">Wygląd M</th></tr>' +
+        keys.map(k => { const x = g[k]; return `<tr><td>${LABEL[k]}</td><td class="num">${x.wynik_pozycje.n}</td><td class="num">${fmt(x.wynik_pozycje.srednia)}</td><td class="num">${fmt(x.wynik_pozycje.sd)}</td><td class="num">${fmt(x.wynik_cyfry.srednia)}</td><td class="num">${fmt(x.nauka_srednia_ms.srednia, 0)}</td><td class="num">${x.nauka_suma_ms.srednia == null ? '—' : fmt(x.nauka_suma_ms.srednia / 1000, 1)}</td><td class="num">${fmt(x.ank_stres.srednia)}</td><td class="num">${fmt(x.ank_wyglad.srednia)}</td></tr>`; }).join('');
+      st.textContent = 'Zaktualizowano: ' + new Date(s.aktualizacja).toLocaleString('pl-PL');
+    } catch (e) {
+      st.innerHTML = '<span class="error">Nie udało się pobrać danych: ' + String(e.message || e) + '</span>';
+    }
+  }
+  document.getElementById('load').addEventListener('click', load);
+  if (ep.value) load();
+})();
+</script>
+</body>
+</html>

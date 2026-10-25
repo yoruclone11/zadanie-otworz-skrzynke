@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="pl" data-color="none" data-shape="round">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Badanie: uczenie się online</title>
+  <meta name="description" content="Krótkie badanie pamięciowe do pracy magisterskiej (ok. 5 minut, anonimowo).">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#f3f3f3">
+  <meta property="og:title" content="Badanie: uczenie się online — weź udział (5 min)">
+  <meta property="og:description" content="Krótkie, anonimowe zadanie pamięciowe do pracy magisterskiej. Uda Ci się otworzyć skrzynkę?">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='12' width='26' height='16' fill='%23777'/%3E%3Crect x='2' y='5' width='28' height='9' fill='%23999'/%3E%3Crect x='13' y='11' width='6' height='8' fill='%23eee'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js"></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+<main>
+
+  <!-- ============ ŁADOWANIE (neutralne, wspólne dla wszystkich wersji) ============ -->
+  <section class="screen active" id="s-loading" aria-busy="true">
+    <div class="center">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="muted">Przygotowywanie badania…</p>
+      <noscript><p><strong>Do udziału w badaniu potrzebny jest włączony JavaScript.</strong></p></noscript>
+    </div>
+  </section>
+
+  <!-- ============ 1. POWITANIE + ZGODA ============ -->
+  <section class="screen" id="s-welcome">
+    <div class="card">
+      <span class="eyebrow">Badanie do pracy magisterskiej</span>
+      <h1>Cześć! Dziękuję, że tu jesteś</h1>
+      <p class="lead">Badam, jak ludzie uczą się z materiałów w środowisku online (e-learning). Czeka Cię jedno krótkie zadanie pamięciowe — spróbujesz otworzyć zamkniętą skrzynkę.</p>
+
+      <ul class="facts">
+        <li>
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+          <div><strong>Około 4–5 minut</strong><span>w jednym podejściu, bez przerw</span></div>
+        </li>
+        <li>
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <div><strong>Anonimowo</strong><span>bez imienia, e-maila i adresu IP</span></div>
+        </li>
+        <li>
+          <span class="ico"><svg class="i" viewBox="0 0 24 24"><path d="M4 12h12"/><path d="M12 6l6 6-6 6"/><path d="M20 4v16"/></svg></span>
+          <div><strong>Dobrowolnie</strong><span>możesz przerwać w dowolnym momencie</span></div>
+        </li>
+      </ul>
+
+      <details class="info">
+        <summary>Informacje o badaniu i danych</summary>
+        <div class="body">
+          <p><strong>Czego dotyczy badanie?</strong> Procesów uczenia się i zapamiętywania informacji w środowisku cyfrowym. Szczegółowy cel poznasz na końcu — podanie go wcześniej mogłoby wpłynąć na wyniki.</p>
+          <p><strong>Jakie dane są zbierane?</strong> Odpowiedzi z krótkiej ankiety (m.in. płeć, rok urodzenia, wykształcenie), wynik zadania, czasy wykonywania poszczególnych kroków oraz podstawowe informacje techniczne (rodzaj urządzenia, rozmiar ekranu, przeglądarka). Nie są zbierane imię, adres e-mail ani adres IP.</p>
+          <p><strong>Jak zostaną wykorzystane?</strong> Wyłącznie w celach naukowych, w zbiorczej formie, w pracy magisterskiej. Nikt nie będzie w stanie powiązać wyników z Twoją osobą.</p>
+          <p><strong>Czy mogę wycofać dane?</strong> Tak — na końcu badania jednym kliknięciem, a później kontaktując się z badaczem i podając kod uczestnika, który zobaczysz na ostatnim ekranie.</p>
+          <p id="researcher-line" hidden></p>
+        </div>
+      </details>
+
+      <div class="tip">Prośba: wykonaj badanie w spokojnym miejscu i nie przełączaj się w tym czasie na inne karty ani aplikacje.</div>
+
+      <label class="check">
+        <input type="checkbox" id="c-adult">
+        <span class="box"><svg class="i" viewBox="0 0 24 24" style="stroke:var(--on-primary);stroke-width:3"><path d="M5 12l5 5 9-10"/></svg></span>
+        <span>Mam ukończone 18 lat.</span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="c-consent">
+        <span class="box"><svg class="i" viewBox="0 0 24 24" style="stroke:var(--on-primary);stroke-width:3"><path d="M5 12l5 5 9-10"/></svg></span>
+        <span>Zapoznałem/am się z informacjami o badaniu i dobrowolnie zgadzam się na udział.</span>
+      </label>
+
+      <div class="actions" style="margin-top:18px">
+        <button class="btn" id="btn-start" disabled>Rozpocznij</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. METRYCZKA ============ -->
+  <section class="screen" id="s-form">
+    <div class="card">
+      <span class="eyebrow">Krok 1 z 3</span>
+      <h2>Kilka informacji o Tobie</h2>
+      <p class="muted">To zajmie kilkanaście sekund. Odpowiedzi służą wyłącznie do opisu grupy badanych.</p>
+
+      <form id="form-meta" novalidate>
+        <fieldset data-req="plec">
+          <legend>Płeć</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="plec" value="kobieta"><span>Kobieta</span></label>
+            <label class="chip"><input type="radio" name="plec" value="mezczyzna"><span>Mężczyzna</span></label>
+            <label class="chip"><input type="radio" name="plec" value="inna"><span>Inna</span></label>
+            <label class="chip"><input type="radio" name="plec" value="brak"><span>Wolę nie podawać</span></label>
+          </div>
+          <p class="err" role="alert">Wybierz jedną z odpowiedzi.</p>
+        </fieldset>
+
+        <fieldset data-req="rok_urodzenia">
+          <legend><label for="f-rok">Rok urodzenia</label></legend>
+          <select id="f-rok" name="rok_urodzenia"><option value="">— wybierz —</option></select>
+          <p class="err" role="alert">Wybierz rok urodzenia.</p>
+        </fieldset>
+
+        <fieldset data-req="wyksztalcenie">
+          <legend>Najwyższe ukończone wykształcenie</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="wyksztalcenie" value="podstawowe"><span>Podstawowe / gimnazjalne</span></label>
+            <label class="chip"><input type="radio" name="wyksztalcenie" value="zawodowe"><span>Zasadnicze zawodowe</span></label>
+            <label class="chip"><input type="radio" name="wyksztalcenie" value="srednie"><span>Średnie</span></label>
+            <label class="chip"><input type="radio" name="wyksztalcenie" value="licencjat_inzynier"><span>Licencjat / inżynier</span></label>
+            <label class="chip"><input type="radio" name="wyksztalcenie" value="magister"><span>Magister lub wyższe</span></label>
+          </div>
+          <p class="err" role="alert">Wybierz jedną z odpowiedzi.</p>
+        </fieldset>
+
+        <fieldset data-req="sytuacja">
+          <legend>Czym się obecnie zajmujesz?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="sytuacja" value="uczy_sie"><span>Uczę się / studiuję</span></label>
+            <label class="chip"><input type="radio" name="sytuacja" value="pracuje"><span>Pracuję</span></label>
+            <label class="chip"><input type="radio" name="sytuacja" value="uczy_sie_i_pracuje"><span>Studiuję i pracuję</span></label>
+            <label class="chip"><input type="radio" name="sytuacja" value="inna"><span>Inna sytuacja</span></label>
+          </div>
+          <p class="err" role="alert">Wybierz jedną z odpowiedzi.</p>
+        </fieldset>
+
+        <fieldset data-req="elearning">
+          <legend>Jak często korzystasz z kursów lub lekcji online?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="elearning" value="nigdy"><span>Nigdy</span></label>
+            <label class="chip"><input type="radio" name="elearning" value="rzadko"><span>Rzadziej niż raz w miesiącu</span></label>
+            <label class="chip"><input type="radio" name="elearning" value="miesiecznie"><span>Kilka razy w miesiącu</span></label>
+            <label class="chip"><input type="radio" name="elearning" value="tygodniowo"><span>Co tydzień lub częściej</span></label>
+          </div>
+          <p class="err" role="alert">Wybierz jedną z odpowiedzi.</p>
+        </fieldset>
+
+        <fieldset data-req="zmeczenie">
+          <legend>Jak bardzo czujesz się teraz zmęczony/a?</legend>
+          <div class="scale" style="--n:5">
+            <label><input type="radio" name="zmeczenie" value="1"><span>1</span></label>
+            <label><input type="radio" name="zmeczenie" value="2"><span>2</span></label>
+            <label><input type="radio" name="zmeczenie" value="3"><span>3</span></label>
+            <label><input type="radio" name="zmeczenie" value="4"><span>4</span></label>
+            <label><input type="radio" name="zmeczenie" value="5"><span>5</span></label>
+          </div>
+          <div class="scale-ends"><span>wcale</span><span>bardzo</span></div>
+          <p class="err" role="alert">Zaznacz wartość na skali.</p>
+        </fieldset>
+
+        <div class="actions">
+          <button class="btn" type="submit">Dalej</button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ 3. INSTRUKCJA ============ -->
+  <section class="screen" id="s-instr">
+    <div class="card">
+      <span class="eyebrow">Krok 2 z 3</span>
+      <h2>Zadanie: otwórz skrzynkę</h2>
+      <p>Skrzynka jest zamknięta na kod złożony z <strong>10 cyfr</strong>. Twoim zadaniem jest go zapamiętać, a potem wpisać.</p>
+      <ol class="steps">
+        <li><div>Zobaczysz kolejno <strong>10 cyfr — każdą osobno</strong>. Razem, w tej kolejności, tworzą kod.</div></li>
+        <li><div>Patrz na każdą cyfrę <strong>tak długo, jak potrzebujesz</strong>, i kliknij „Dalej”. Nie da się wrócić do poprzedniej cyfry.</div></li>
+        <li><div>Na końcu <strong>wpisz cały kod z pamięci</strong>. Jeśli którejś cyfry nie pamiętasz — wpisz najlepszą odpowiedź, jaką masz.</div></li>
+      </ol>
+      <div class="tip"><strong>Ważne:</strong> nie zapisuj cyfr i nie rób zdjęć ani zrzutów ekranu — liczy się wyłącznie Twoja pamięć.</div>
+      <div class="actions">
+        <button class="btn" id="btn-ready">Jestem gotowy/a</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ODLICZANIE ============ -->
+  <section class="screen" id="s-countdown">
+    <div class="countdown" aria-live="assertive">
+      <div>
+        <p class="muted" style="font-weight:700">Zapamiętaj kod</p>
+        <div class="num" id="cd-num">3</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. NAUKA: 10 KAFELKÓW ============ -->
+  <section class="screen" id="s-study">
+    <div class="study">
+      <div class="dots" id="dots" aria-hidden="true"></div>
+      <p class="count" id="tile-count">Cyfra 1 z 10</p>
+      <div class="tile" id="tile"><span id="tile-digit" aria-live="polite"></span></div>
+      <div class="hold" aria-hidden="true"><div class="hold-bar" id="hold-bar"></div></div>
+      <button class="btn" id="btn-next" disabled>Dalej</button>
+      <p class="hint">Możesz też nacisnąć spację lub Enter</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. SKRZYNKA: WPISYWANIE KODU ============ -->
+  <section class="screen" id="s-lock">
+    <div class="card center" id="lock-card">
+      <div class="chest-wrap" data-chest="lock"></div>
+      <h2>Wpisz kod, aby otworzyć skrzynkę</h2>
+      <p class="muted small" style="margin:0">Wpisz 10 cyfr w zapamiętanej kolejności.</p>
+      <div class="slots" id="slots" role="group" aria-label="Wpisany kod"></div>
+      <p class="sr-only" id="slots-live" aria-live="polite"></p>
+
+      <div class="keypad" id="keypad">
+        <button class="key" data-k="1">1</button><button class="key" data-k="2">2</button><button class="key" data-k="3">3</button>
+        <button class="key" data-k="4">4</button><button class="key" data-k="5">5</button><button class="key" data-k="6">6</button>
+        <button class="key" data-k="7">7</button><button class="key" data-k="8">8</button><button class="key" data-k="9">9</button>
+        <button class="key fn" data-k="del" aria-label="Usuń ostatnią cyfrę">
+          <svg class="i" viewBox="0 0 24 24"><path d="M9 5h11v14H9l-6-7z"/><path d="M12 9l5 6M17 9l-5 6"/></svg>
+        </button>
+        <button class="key" data-k="0">0</button>
+        <button class="key fn" data-k="clr" aria-label="Wyczyść wszystko">C</button>
+      </div>
+      <div class="lock-actions">
+        <button class="btn btn-wide" id="btn-open" disabled>
+          <svg class="i" viewBox="0 0 24 24" style="width:22px;height:22px"><rect x="5" y="11" width="14" height="10"/><path d="M8 11V7a4 4 0 0 1 8 0"/></svg>
+          Otwórz skrzynkę
+        </button>
+      </div>
+      <div class="processing" aria-live="polite"><div class="spinner"></div>Zamek sprawdza kod…</div>
+    </div>
+  </section>
+
+  <!-- ============ 6. ANKIETA PO ZADANIU ============ -->
+  <section class="screen" id="s-survey">
+    <div class="card">
+      <span class="eyebrow">Krok 3 z 3</span>
+      <h2>Zanim zobaczysz, czy skrzynka się otworzyła…</h2>
+      <p class="muted">…odpowiedz proszę na kilka krótkich pytań o samo zadanie.</p>
+      <form id="form-survey" novalidate>
+        <div id="survey-items"></div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn" type="submit" id="btn-survey">Zobacz wynik</button>
+        </div>
+        <p class="err" id="save-err" role="alert"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============ 7. WYNIK + WYJAŚNIENIE CELU ============ -->
+  <section class="screen" id="s-reveal">
+    <div class="card">
+      <div class="center">
+        <div class="chest-wrap" data-chest="reveal"></div>
+        <div class="score" id="score">0<small> / 10</small></div>
+        <p class="reveal-msg" id="reveal-msg"></p>
+        <p class="muted small" style="margin:0">Cyfry na właściwych miejscach:</p>
+        <div class="slots" id="result-slots"></div>
+        <p class="muted small">Ze względu na kolejnych uczestników nie pokazujemy prawidłowego kodu.</p>
+      </div>
+
+      <hr class="sep">
+
+      <div class="debrief">
+        <h2>Co naprawdę sprawdzało to badanie?</h2>
+        <p>Badanie dotyczy <strong>wpływu wyglądu interfejsu na zapamiętywanie informacji</strong>. Każda osoba jest losowo przydzielana do jednej z czterech wersji strony, które różnią się <strong>kolorystyką</strong> (spokojna niebieska albo kontrastowa czerwona) oraz <strong>kształtem elementów</strong> (zaokrąglone albo ostre). Zadanie i kod są we wszystkich wersjach identyczne — różni się wyłącznie wygląd.</p>
+        <p>Ty korzystałeś/aś z wersji: <strong id="my-version"></strong>.</p>
+        <p>Na początku pełny cel nie został podany, bo wiedza o nim mogłaby zmienić sposób, w jaki patrzysz na stronę, i zniekształcić wyniki.</p>
+        <div class="tip"><strong>Wielka prośba:</strong> nie zdradzaj nikomu kodu, przebiegu zadania ani celu badania. Dzięki temu wyniki kolejnych osób pozostaną wiarygodne. Link do badania możesz za to śmiało przesłać dalej!</div>
+
+        <p>Twój kod uczestnika: <span class="code-box" id="pid-code"></span></p>
+        <p class="small muted">Jeśli zmienisz zdanie później, podaj ten kod badaczowi, a Twoje dane zostaną usunięte.<span id="contact-line"></span></p>
+
+        <div class="actions">
+          <button class="btn" id="btn-share">
+            <svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="M10 14l10-10"/><path d="M14 4h6v6"/><path d="M20 14v6H4V4h6"/></svg>
+            <span>Skopiuj link do badania</span>
+          </button>
+          <button class="btn btn-ghost" id="btn-withdraw">Wycofaj moje dane</button>
+        </div>
+        <p class="small muted" id="withdraw-msg" aria-live="polite" style="margin-top:12px"></p>
+        <p style="margin-top:18px"><strong>Dziękuję za udział!</strong> Możesz już zamknąć tę stronę.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EKRANY SPECJALNE ============ -->
+  <section class="screen" id="s-done">
+    <div class="card">
+      <h2>Już wziąłeś/aś udział w tym badaniu</h2>
+      <p>Dziękuję! Badanie można wykonać tylko raz — drugie podejście nie byłoby już miarodajne, bo kod jest za każdym razem taki sam.</p>
+      <p class="muted">Jeśli chcesz pomóc, prześlij link znajomym.</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-interrupted">
+    <div class="card">
+      <h2>Badanie zostało przerwane</h2>
+      <p>Strona została odświeżona lub zamknięta w trakcie zadania. Ponieważ widziałeś/aś już część kodu, nie da się rozpocząć zadania od nowa — wynik nie byłby miarodajny.</p>
+      <p class="muted">Dziękuję za chęć udziału!</p>
+    </div>
+  </section>
+
+  <section class="screen" id="s-underage">
+    <div class="card">
+      <h2>Dziękuję za zainteresowanie</h2>
+      <p>W badaniu mogą wziąć udział wyłącznie osoby pełnoletnie. Żadne Twoje dane nie zostały zapisane.</p>
+    </div>
+  </section>
+
+</main>
+</body>
+</html>

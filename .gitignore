@@ -1,0 +1,6 @@
+analiza/raport.md
+analiza/*.png
+analiza/symulowane.csv
+analiza/wyniki*.csv
+__pycache__/
+.DS_Store
